@@ -1,5 +1,61 @@
+"use client";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./auth.module.scss";
 export default function AuthComponent() {
+  const router = useRouter();
+  // Determinate if the login is success
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  //show login Form or create form
+  const [isLogin, setIsLogin] = useState(false);
+
+  const [loginData, setLoginData] = useState({ user: "", pass: "" });
+  const [createData, setCreateData] = useState({
+    email: "",
+    user: "",
+    pass: "",
+    pass2: "",
+  });
+  const [otpCode, setOtpCode] = useState<number | undefined>(undefined);
+  const switchToLogin = (o: boolean) => {
+    setIsLogin(o);
+  };
+  //Logic to create user
+  const createAccount = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log(createData);
+    setIsLogin(true);
+  };
+
+  const onHandleChangeCreate = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setCreateData({ ...createData, [name]: value });
+  };
+  //Logic to do the login
+  const auth = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log(loginData);
+    setLoginSuccess(true);
+  };
+
+  const onHandleChangeAuth = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setLoginData({ ...loginData, [name]: value });
+  };
+
+  // Logic to validate the otp
+  const otp = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    alert(otpCode);
+    router.push("./dashboard");
+  };
+
+  const onHandleChangeOtp = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setOtpCode(value);
+  };
   return (
     <div className={styles.root + " w-full h-screen p-5 grid grid-cols-2"}>
       <div
@@ -17,19 +73,100 @@ export default function AuthComponent() {
           " flex flex-col justify-center w-full h-full p-[8rem]"
         }
       >
-        <div>
-          <h1>Create an Account</h1>
-          <h5>
-            Already have an account? <span>Sing In</span>
-          </h5>
-          <p className="mt-[30px]">Username</p>
-          <input type="text" />
-          <p>Password</p>
-          <input type="text" />
-          <p>Confirm Password</p>
-          <input type="text" />
-          <button type="submit">Create Account</button>
-        </div>
+        {!loginSuccess ? (
+          <div>
+            {!isLogin ? (
+              <form onSubmit={createAccount}>
+                <h1>Create an Account</h1>
+                <h5>
+                  Already have an account?
+                  <span>
+                    <a
+                      style={{ textDecoration: "underline", cursor: "pointer" }}
+                      onClick={() => switchToLogin(true)}
+                    >
+                      Sing In
+                    </a>
+                  </span>
+                </h5>
+                <p className="mt-[30px]">Email</p>
+                <input
+                  value={createData.email}
+                  onChange={onHandleChangeCreate}
+                  name="email"
+                  type="email"
+                />
+                <p>Username</p>
+                <input
+                  value={createData.user}
+                  onChange={onHandleChangeCreate}
+                  name="user"
+                  type="text"
+                />
+                <p>Password</p>
+                <input
+                  value={createData.pass}
+                  onChange={onHandleChangeCreate}
+                  name="pass"
+                  type="text"
+                />
+                <p>Confirm Password</p>
+                <input
+                  value={createData.pass2}
+                  onChange={onHandleChangeCreate}
+                  name="pass2"
+                  type="text"
+                />
+                <button type="submit">Create Account</button>
+              </form>
+            ) : (
+              <form onSubmit={auth}>
+                <h1>Login</h1>
+                <h5>
+                  Don`t have an account?
+                  <span>
+                    <a
+                      style={{ textDecoration: "underline", cursor: "pointer" }}
+                      onClick={() => switchToLogin(false)}
+                    >
+                      Sing In
+                    </a>
+                  </span>
+                </h5>
+                <p className="mt-[30px]">Username</p>
+                <input
+                  value={loginData.user}
+                  onChange={onHandleChangeAuth}
+                  name="user"
+                  type="text"
+                />
+                <p>Password</p>
+                <input
+                  value={loginData.pass}
+                  onChange={onHandleChangeAuth}
+                  name="pass"
+                  type="text"
+                />
+                <button type="submit">Login</button>
+              </form>
+            )}
+          </div>
+        ) : (
+          <div>
+            <form onSubmit={otp}>
+              <h1>Auth Two-Factor OTP</h1>
+              <h5>We send you an email with a OTP code</h5>
+              <p className="mt-[30px]">Email</p>
+              <input
+                value={otpCode}
+                onChange={onHandleChangeOtp}
+                name="OTP"
+                type="number"
+              />
+              <button type="submit">Create Account</button>
+            </form>
+          </div>
+        )}
       </div>
       <p
         style={{
