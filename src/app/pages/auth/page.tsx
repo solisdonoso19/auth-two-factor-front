@@ -2,6 +2,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./auth.module.scss";
+import axios from "axios";
 export default function AuthComponent() {
   const router = useRouter();
   // Determinate if the login is success
@@ -163,7 +164,7 @@ export default function AuthComponent() {
                 name="OTP"
                 type="number"
               />
-              <button type="submit">Create Account</button>
+              <button type="submit">Send</button>
             </form>
           </div>
         )}
