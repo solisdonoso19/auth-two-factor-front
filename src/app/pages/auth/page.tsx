@@ -9,8 +9,12 @@ export default function AuthComponent() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   //show login Form or create form
   const [isLogin, setIsLogin] = useState(false);
-
-  const [loginData, setLoginData] = useState({ user: "", pass: "" });
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  const [loginData, setLoginData] = useState({ user: "", password: "" });
   const [createData, setCreateData] = useState({
     email: "",
     user: "",
@@ -18,14 +22,30 @@ export default function AuthComponent() {
     pass2: "",
   });
   const [otpCode, setOtpCode] = useState<number | undefined>(undefined);
+  const [userId, setUserId] = useState(0);
   const switchToLogin = (o: boolean) => {
     setIsLogin(o);
   };
   //Logic to create user
   const createAccount = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(createData);
-    setIsLogin(true);
+    if (createData.pass !== createData.pass2) {
+      alert("The password doesn't match");
+    } else {
+      const params = {
+        user: createData.user,
+        email: createData.email,
+        password: createData.pass,
+      };
+      axios
+        .post("http://127.0.0.1:8000/api/create_user/", params, config)
+        .then((res) => {
+          if (res) {
+            setIsLogin(true);
+          }
+        })
+        .catch((r) => console.log(r));
+    }
   };
 
   const onHandleChangeCreate = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +57,18 @@ export default function AuthComponent() {
   const auth = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(loginData);
-    setLoginSuccess(true);
+    axios
+      .post("http://127.0.0.1:8000/api/login/", loginData)
+      .then((res) => {
+        const login = res.data;
+        setUserId(login.id);
+        if (login.login) {
+          setLoginSuccess(true);
+        } else {
+          alert("El usuario o la contraseña estan mal, intente de nuevo");
+        }
+      })
+      .catch((r) => console.log(r));
   };
 
   const onHandleChangeAuth = (e: ChangeEvent<HTMLInputElement>) => {
@@ -49,8 +80,23 @@ export default function AuthComponent() {
   // Logic to validate the otp
   const otp = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    alert(otpCode);
-    router.push("./dashboard");
+    if (otpCode !== undefined) {
+      const param = {
+        id: userId,
+        otp: otpCode,
+      };
+      console.log(param);
+      axios.post("http://127.0.0.1:8000/api/otp/", param).then((res) => {
+        console.log(res.data);
+        if (res.data.login) {
+          router.push("./dashboard");
+        } else {
+          alert("The Code is wrong");
+        }
+      });
+    } else {
+      alert("Field OTP is Empty");
+    }
   };
 
   const onHandleChangeOtp = (e: ChangeEvent<HTMLInputElement>) => {
@@ -109,14 +155,14 @@ export default function AuthComponent() {
                   value={createData.pass}
                   onChange={onHandleChangeCreate}
                   name="pass"
-                  type="text"
+                  type="password"
                 />
                 <p>Confirm Password</p>
                 <input
                   value={createData.pass2}
                   onChange={onHandleChangeCreate}
                   name="pass2"
-                  type="text"
+                  type="password"
                 />
                 <button type="submit">Create Account</button>
               </form>
@@ -143,10 +189,10 @@ export default function AuthComponent() {
                 />
                 <p>Password</p>
                 <input
-                  value={loginData.pass}
+                  value={loginData.password}
                   onChange={onHandleChangeAuth}
-                  name="pass"
-                  type="text"
+                  name="password"
+                  type="password"
                 />
                 <button type="submit">Login</button>
               </form>
@@ -157,7 +203,7 @@ export default function AuthComponent() {
             <form onSubmit={otp}>
               <h1>Auth Two-Factor OTP</h1>
               <h5>We send you an email with a OTP code</h5>
-              <p className="mt-[30px]">Email</p>
+              <p className="mt-[30px]">OTP</p>
               <input
                 value={otpCode}
                 onChange={onHandleChangeOtp}

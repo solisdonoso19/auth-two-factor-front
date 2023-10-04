@@ -52,6 +52,7 @@ export default function DashboardComponent() {
     axios.get("https://restcountries.com/v3.1/all").then((res: any) => {
       setCountries(res.data);
     });
+    alert("Login Succesfully");
   }, []);
 
   useEffect(() => {

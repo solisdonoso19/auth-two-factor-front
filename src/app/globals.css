@@ -11,3 +11,6 @@ body {
   height: auto;
   width: auto;
 }
+button {
+  cursor: pointer;
+}
