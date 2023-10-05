@@ -38,7 +38,7 @@ export default function AuthComponent() {
         password: createData.pass,
       };
       axios
-        .post("http://127.0.0.1:8000/api/create_user/", params, config)
+        .post("http://3.86.193.14:443/api/create_user/", params, config)
         .then((res) => {
           if (res) {
             setIsLogin(true);
@@ -58,7 +58,7 @@ export default function AuthComponent() {
     event.preventDefault();
     console.log(loginData);
     axios
-      .post("http://127.0.0.1:8000/api/login/", loginData)
+      .post("http://3.86.193.14:443/api/login/", loginData)
       .then((res) => {
         const login = res.data;
         setUserId(login.id);
@@ -86,7 +86,7 @@ export default function AuthComponent() {
         otp: otpCode,
       };
       console.log(param);
-      axios.post("http://127.0.0.1:8000/api/otp/", param).then((res) => {
+      axios.post("http://3.86.193.14:443/api/otp/", param).then((res) => {
         console.log(res.data);
         if (res.data.login) {
           router.push("./dashboard");
