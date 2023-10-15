@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./auth.module.scss";
 import axios from "axios";
@@ -23,12 +23,30 @@ export default function AuthComponent() {
   });
   const [otpCode, setOtpCode] = useState<number | undefined>(undefined);
   const [userId, setUserId] = useState(0);
+  const [seconds, setSeconds] = useState(300); // 300 segundos (5 minutos)
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    let timer: any;
+
+    if (isActive && seconds > 0) {
+      timer = setTimeout(() => {
+        setSeconds(seconds - 1);
+      }, 1000); // Reducir 1 segundo cada segundo (1000 ms)
+    }
+
+    // Limpia el temporizador cuando el componente se desmonta o cuando el tiempo llega a 0
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isActive, seconds]);
   const switchToLogin = (o: boolean) => {
     setIsLogin(o);
   };
   //Logic to create user
   const createAccount = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsActive(true);
     if (createData.pass !== createData.pass2) {
       alert("The password doesn't match");
     } else {
@@ -103,6 +121,7 @@ export default function AuthComponent() {
     const value = parseInt(e.target.value);
     setOtpCode(value);
   };
+
   return (
     <div className={styles.root + " w-full h-screen p-5 grid grid-cols-2"}>
       <div
@@ -215,6 +234,12 @@ export default function AuthComponent() {
           </div>
         )}
       </div>
+      <p style={{ color: "white", fontSize: "50px" }}>
+        Timer:{" "}
+        {`${Math.floor(seconds / 60)}:${(seconds % 60)
+          .toString()
+          .padStart(2, "0")}`}
+      </p>
       <p
         style={{
           position: "absolute",
