@@ -23,7 +23,7 @@ export default function AuthComponent() {
   });
   const [otpCode, setOtpCode] = useState<number | undefined>(undefined);
   const [userId, setUserId] = useState(0);
-  const [seconds, setSeconds] = useState(300); // 300 segundos (5 minutos)
+  const [seconds, setSeconds] = useState(15); // 300 segundos (5 minutos)
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
@@ -46,7 +46,6 @@ export default function AuthComponent() {
   //Logic to create user
   const createAccount = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsActive(true);
     if (createData.pass !== createData.pass2) {
       alert("The password doesn't match");
     } else {
@@ -56,7 +55,7 @@ export default function AuthComponent() {
         password: createData.pass,
       };
       axios
-        .post("http://3.86.193.14:443/api/create_user/", params, config)
+        .post("http://54.175.85.58:443/api/create_user/", params, config)
         .then((res) => {
           if (res) {
             setIsLogin(true);
@@ -76,12 +75,13 @@ export default function AuthComponent() {
     event.preventDefault();
     console.log(loginData);
     axios
-      .post("http://3.86.193.14:443/api/login/", loginData)
+      .post("http://54.175.85.58:443/api/login/", loginData)
       .then((res) => {
         const login = res.data;
         setUserId(login.id);
         if (login.login) {
           setLoginSuccess(true);
+          setIsActive(true);
         } else {
           alert("El usuario o la contraseña estan mal, intente de nuevo");
         }
@@ -104,10 +104,14 @@ export default function AuthComponent() {
         otp: otpCode,
       };
       console.log(param);
-      axios.post("http://3.86.193.14:443/api/otp/", param).then((res) => {
+      axios.post("http://54.175.85.58:443/api/otp/", param).then((res) => {
         console.log(res.data);
         if (res.data.login) {
-          router.push("./dashboard");
+          if (seconds <= 0) {
+            alert("Token Expirado");
+          } else {
+            router.push("./dashboard");
+          }
         } else {
           alert("The Code is wrong");
         }
@@ -234,12 +238,12 @@ export default function AuthComponent() {
           </div>
         )}
       </div>
-      <p style={{ color: "white", fontSize: "50px" }}>
+      {/* <p style={{ color: "white", fontSize: "50px" }}>
         Timer:{" "}
         {`${Math.floor(seconds / 60)}:${(seconds % 60)
           .toString()
           .padStart(2, "0")}`}
-      </p>
+      </p> */}
       <p
         style={{
           position: "absolute",
